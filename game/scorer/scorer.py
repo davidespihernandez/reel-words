@@ -13,7 +13,7 @@ class Scorer:
         lines = [line.split() for line in file_contents]
         self.scores = {line[0]: int(line[1]) for line in lines}
 
-    def get_score(self, word: str) -> int:
+    def calculate_word_score(self, word: str) -> int:
         score: int = 0
         for letter in word:
             score += self.scores.get(letter)
