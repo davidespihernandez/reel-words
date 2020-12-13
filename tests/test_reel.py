@@ -42,6 +42,6 @@ class TestReel(TestCase):
         result = []
         expected = ["b", "c", "a"]
         for i in range(len(letters)):
-            result.append(reel.current_value())
+            result.append(reel.current_letter())
             next(reel)
         self.assertEqual(result, expected)

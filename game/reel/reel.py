@@ -22,13 +22,13 @@ class Reel:
         )
 
     def __next__(self):
-        return_value = self.current_value()
+        return_value = self.current_letter()
         self.initial_index += 1
         if self.initial_index >= len(self.letters):
             self.initial_index = 0
         return return_value
 
-    def current_value(self) -> str:
+    def current_letter(self) -> str:
         return self.letters[self.initial_index]
 
     def __iter__(self):
