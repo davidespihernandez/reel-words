@@ -1,4 +1,5 @@
 from functools import reduce
+from pathlib import Path
 from unittest import TestCase
 
 from game.scorer import Scorer
@@ -35,6 +36,9 @@ class TestScorer(TestCase):
             "y": 4,
             "z": 10,
         }
+        parent = Path(__file__).parent.parent
+        path = parent / "resources" / "scores.txt"
+        self.scorer.load_from_file(path)
 
     def test_all_scores_are_loaded(self):
         self.assertEqual(self.scorer.scores, self.all_scores)
