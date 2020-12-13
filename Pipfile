@@ -7,3 +7,4 @@ verify_ssl = true
 black = "==20.8b1"
 
 [packages]
+unidecode = "*"

@@ -7,7 +7,7 @@ class Scorer:
 
     def load_from_file(self, path: Path):
         with path.open() as file:
-            file_contents = file.readlines()
+            file_contents = file.read().splitlines()
         lines = [line.split() for line in file_contents]
         self.scores = {line[0]: int(line[1]) for line in lines}
 

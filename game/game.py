@@ -13,3 +13,5 @@ class ReelGame:
         parent = Path(__file__).parent
         path = parent / "resources" / "scores.txt"
         self.scorer.load_from_file(path)
+        path = parent / "resources" / "american-english-large.txt"
+        self.trie.load_from_file(path)

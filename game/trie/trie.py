@@ -1,4 +1,8 @@
+import unicodedata
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+import unidecode as unidecode
 
 
 class Node:
@@ -24,40 +28,45 @@ class Trie:
         self.root = Node(letter="^")
         self.number_of_words = 0  # for testing purposes
 
+    def _normalize_word(self, word):
+        normalized = unidecode.unidecode(word)
+        return normalized.replace("'", "").lower()
+
     def add_word(self, word: str) -> None:
         if not word:
             return
         node: Node = self.root
-        for letter in word:
+        for letter in self._normalize_word(word):
             existing = node.children.get(letter)
             if existing:
                 node = existing
             else:
                 node = node.add_child(letter)
         node.is_leaf = True
-        self.number_of_words += 1
+        if not existing:
+            self.number_of_words += 1
 
     def search_word(self, word: str) -> bool:
         if not word:
             return False
         node: Node = self.root
-        for letter in word:
+        for letter in self._normalize_word(word):
             node = node.children.get(letter)
             if not node:
                 return False
         return node.is_leaf
 
-    def delete_word(self, word: str):
+    def delete_word(self, word: str) -> bool:
         if not word:
-            return
+            return False
         node: Node = self.root
         parent_node: Optional[Node]
         nodes_to_delete: List[Tuple[Node, Node]] = []
-        for letter in word:
+        for letter in self._normalize_word(word):
             parent_node = node
             node = node.children.get(letter)
             if not node:
-                return
+                return False
             nodes_to_delete.append(
                 (
                     node,
@@ -70,5 +79,14 @@ class Trie:
             parent_node: Node = node_tuple[1]
             if i == 0:
                 node.is_leaf = False
-            if len(node.children) == 0:
+            if len(node.children) == 0 and not node.is_leaf:
                 del parent_node.children[node.letter]
+
+        self.number_of_words -= 1
+        return True
+
+    def load_from_file(self, path: Path):
+        with path.open() as file:
+            file_contents = file.read().splitlines()
+        for word in file_contents:
+            self.add_word(word)

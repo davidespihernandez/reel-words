@@ -36,8 +36,7 @@ class TestScorer(TestCase):
             "y": 4,
             "z": 10,
         }
-        parent = Path(__file__).parent.parent
-        path = parent / "resources" / "scores.txt"
+        path = Path(__file__).parent / "resources" / "scores.txt"
         self.scorer.load_from_file(path)
 
     def test_all_scores_are_loaded(self):
