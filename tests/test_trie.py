@@ -8,7 +8,7 @@ class TestTrie(TestCase):
     def setUp(self):
         self.trie = Trie()
 
-    def test_load_from_file(self):
+    def test_load_from_file_and_search(self):
         path = Path(__file__).parent / "resources" / "words.txt"
         self.trie.load_from_file(path)
         words_in_file = [
@@ -30,6 +30,7 @@ class TestTrie(TestCase):
         self.assertEqual(self.trie.number_of_words, len(words_in_file))
         search_result = {word: self.trie.search_word(word) for word in expected}
         self.assertTrue(all([v for k, v in search_result.items()]))
+        self.assertFalse(self.trie.search_word("other"))
 
     def test_add_word(self):
         word: str = "abc"
