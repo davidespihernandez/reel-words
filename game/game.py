@@ -33,7 +33,6 @@ class ReelGame:
         self.scorer = Scorer()
         self.trie = Trie()
         self.reels = []
-        self.load_data_from_files()
 
     def selected_word(self, reel_numbers: List[int]) -> str:
         """
