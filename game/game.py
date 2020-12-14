@@ -38,7 +38,7 @@ class ReelGame:
         """
         Calculates the word selected by the player, based on the selected reels (in order of selection).
         Moves forward the selected reels to the next value.
-        :param reel_numbers: list of reel indexex
+        :param reel_numbers: list of reel indexes
         :return: a string with the word
         Example:
             a b c d e f <- current value in reels
