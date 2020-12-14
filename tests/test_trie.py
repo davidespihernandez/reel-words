@@ -81,3 +81,12 @@ class TestTrie(TestCase):
         self.assertEqual(self.trie.number_of_words, 1)
         self.assertFalse(self.trie.search_word(child_word))
         self.assertTrue(self.trie.search_word(parent_word))
+
+    def test_all_possible_words(self):
+        self.trie.add_word("a")
+        self.trie.add_word("at")
+        self.trie.add_word("sat")
+        self.trie.add_word("other")
+        result = sorted(self.trie.get_all_possible_words("tas"))
+        expected = ["a", "at", "sat"]
+        self.assertEqual(expected, result)

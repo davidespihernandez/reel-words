@@ -1,3 +1,4 @@
+import itertools
 import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -90,3 +91,19 @@ class Trie:
             file_contents = file.read().splitlines()
         for word in file_contents:
             self.add_word(word)
+
+    def get_all_possible_words(self, letters: str) -> List[str]:
+        words: List[str] = []
+        if not letters or not letters.strip():
+            return words
+        # first single letter
+        for letter in letters:
+            if self.search_word(letter):
+                words.append(letter)
+        # now combinations from 2 -> len(word) groups
+        for group_length in range(2, len(letters) + 1):
+            for permutation in itertools.permutations(letters, group_length):
+                permutation_str = "".join(permutation)
+                if self.search_word(permutation_str):
+                    words.append(permutation_str)
+        return words
