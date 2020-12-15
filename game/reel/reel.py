@@ -4,7 +4,7 @@ from typing import Optional, List
 
 
 class Reel:
-    initial_index: int
+    index: int
     letters: str
 
     def __init__(self, letters: str, initial_index: Optional[int] = None):
@@ -15,7 +15,7 @@ class Reel:
         ):
             raise ValueError("Wrong initial index")
         self.letters = letters
-        self.initial_index = (
+        self.index = (
             initial_index
             if initial_index is not None
             else random.randint(0, len(letters) - 1)
@@ -23,13 +23,13 @@ class Reel:
 
     def __next__(self):
         return_value = self.current_letter()
-        self.initial_index += 1
-        if self.initial_index >= len(self.letters):
-            self.initial_index = 0
+        self.index += 1
+        if self.index >= len(self.letters):
+            self.index = 0
         return return_value
 
     def current_letter(self) -> str:
-        return self.letters[self.initial_index]
+        return self.letters[self.index]
 
     def __iter__(self):
         return self

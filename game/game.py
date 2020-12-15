@@ -114,6 +114,10 @@ class ReelGame:
         self.number_of_existing_words = 0
         self.number_of_not_existing_words = 0
         self.number_of_invalid_words = 0
+        # load reels again
+        parent = Path(__file__).parent
+        path = parent / "resources" / "reels.txt"
+        self.reels = Reel.get_from_file(path)
 
     def cheat(self) -> List[str]:
         """
