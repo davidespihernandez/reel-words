@@ -6,40 +6,84 @@ from game.reel import Reel
 
 
 class TestGame(TestCase):
-    def test_current_word(self):
-        game = ReelGame()
-        game.reels = [
+    def setUp(self):
+        self.game = ReelGame()
+        self.game.reels = [
             Reel(letters="abc", initial_index=0),
             Reel(letters="bcd", initial_index=0),
             Reel(letters="cde", initial_index=0),
         ]
-        # the current word is the first letter of each reel -> abc
-        self.assertEqual(game.current_word(), "abc")
-
-    def test_selected_word(self):
-        game = ReelGame()
-        game.reels = [
-            Reel(letters="abc", initial_index=1),
-            Reel(letters="bcd", initial_index=1),
-            Reel(letters="cde", initial_index=1),
-        ]
-        # the current word is the second letter of each reel -> bcd
-        # selected_word moves forward each selected reel
-        self.assertEqual(game.selected_word([0]), "b")
-        self.assertEqual(game.selected_word([1]), "c")
-        self.assertEqual(game.selected_word([2]), "d")
-        self.assertEqual(game.selected_word([0, 1]), "cd")
-        self.assertEqual(game.selected_word([0, 1, 2]), "abe")
-
-    def test_word_score(self):
-        game = ReelGame()
-
         path = Path(__file__).parent / "resources" / "scores.txt"
-        game.scorer.load_from_file(path)
+        self.game.scorer.load_from_file(path)
+
+    def current_reels_letters(self):
+        # the current word is the first letter of each reel -> abc
+        self.assertEqual(self.game.current_reels_letters(), "abc")
+
+    def test_game_process_word(self):
         word = "abc"
-        game.trie.add_word(word)
-        self.assertEqual(game.word_score(word), 7)  # 1 + 3 + 3
-        self.assertEqual(game.word_score("other"), 0)
+        self.game.trie.add_word(word)
+        self.assertEqual(self.game.process_word(word), 7)  # 1 + 3 + 3
+        self.assertEqual(self.game.current_reels_letters(), "bcd")
+        self.assertEqual(self.game.last_existing_word, word)
+        self.assertEqual(self.game.number_of_existing_words, 1)
+        self.assertEqual(self.game.total_score, 7)
+        self.assertEqual(self.game.total_words, 1)
+        # search a new word with the new reels
+        word = "dc"
+        self.game.trie.add_word(word)
+        self.assertEqual(self.game.process_word(word), 5)  # 3 + 2
+        self.assertEqual(self.game.current_reels_letters(), "bde")
+        self.assertEqual(self.game.last_existing_word, word)
+        self.assertEqual(self.game.number_of_existing_words, 2)
+        self.assertEqual(self.game.total_score, 7 + 5)
+        self.assertEqual(self.game.total_words, 2)
+        # now a not existing word
+        word = "be"
+        self.assertEqual(self.game.process_word(word), 0)  # not existing
+        self.assertEqual(self.game.current_reels_letters(), "bde")  # no changes
+        self.assertEqual(self.game.last_existing_word, "dc")
+        self.assertEqual(self.game.last_not_existing_word, word)
+        self.assertEqual(self.game.number_of_existing_words, 2)
+        self.assertEqual(self.game.number_of_not_existing_words, 1)
+        self.assertEqual(self.game.total_score, 7 + 5)  # same score
+        self.assertEqual(self.game.total_words, 3)
+        # now an invalid word (not buildable with the reels letters)
+        word = "ba"
+        self.assertEqual(self.game.process_word(word), -1)  # invalid
+        self.assertEqual(self.game.current_reels_letters(), "bde")  # no changes
+        self.assertEqual(self.game.last_existing_word, "dc")
+        self.assertEqual(self.game.last_not_existing_word, "be")
+        self.assertEqual(self.game.number_of_existing_words, 2)
+        self.assertEqual(self.game.number_of_not_existing_words, 1)
+        self.assertEqual(self.game.number_of_invalid_words, 1)
+        self.assertEqual(self.game.total_score, 7 + 5)  # same score
+        self.assertEqual(self.game.total_words, 4)
+
+    def test_process_invalid_word(self):
+        self.assertEqual(self.game.current_reels_letters(), "abc")
+        self.assertEqual(self.game.process_word("bba"), -1)
+        self.assertEqual(self.game.process_word("aab"), -1)
+        self.assertEqual(self.game.process_word("fa"), -1)
+        self.assertEqual(self.game.process_word("f"), -1)
+        self.assertEqual(self.game.process_word(""), -1)
+
+    def test_process_valid_not_existing_word(self):
+        self.assertEqual(self.game.current_reels_letters(), "abc")
+        self.assertEqual(self.game.process_word("a"), 0)
+        self.assertEqual(self.game.process_word("b"), 0)
+        self.assertEqual(self.game.process_word("c"), 0)
+        self.assertEqual(self.game.process_word("ab"), 0)
+        self.assertEqual(self.game.process_word("bc"), 0)
+        self.assertEqual(self.game.process_word("ac"), 0)
+        self.assertEqual(self.game.process_word("ba"), 0)
+        self.assertEqual(self.game.process_word("cb"), 0)
+        self.assertEqual(self.game.process_word("ca"), 0)
+        self.assertEqual(self.game.process_word("abc"), 0)
+        self.assertEqual(self.game.process_word("bca"), 0)
+        self.assertEqual(self.game.process_word("cab"), 0)
+        # reels are the same
+        self.assertEqual(self.game.current_reels_letters(), "abc")
 
     def test_actual_load(self):
         game = ReelGame()

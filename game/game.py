@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from pathlib import Path
 from typing import List
 
@@ -16,8 +17,21 @@ class ReelGame:
     reels: List[Reel]
     total_score: int = 0
     total_words: int = 0
+    last_existing_word: str = ""
+    last_not_existing_word: str = ""
+    # words that are not formed using the reels letters
+    number_of_invalid_words: int = 0
+    # valid word (formed using the reels letters) and existing in the trie
+    number_of_existing_words: int = 0
+    # valid word (formed using the reels letters) and not existing in the trie
+    number_of_not_existing_words: int = 0
+    previous_reels_letters: str = ""
 
     def load_data_from_files(self):
+        """
+        Loads the scorer, trie and reels data from the resources files
+        :return:
+        """
         # separated method to allow mock easier
         logger.info("Loading data...")
         parent = Path(__file__).parent
@@ -34,40 +48,66 @@ class ReelGame:
         self.trie = Trie()
         self.reels = []
 
-    def selected_word(self, reel_numbers: List[int]) -> str:
-        """
-        Calculates the word selected by the player, based on the selected reels (in order of selection).
-        Moves forward the selected reels to the next value.
-        :param reel_numbers: list of reel indexes
-        :return: a string with the word
-        Example:
-            a b c d e f <- current value in reels
-            [5, 4, 0] <- reel_numbers
-            "fea" -> returned word
-        """
-        word = []
-        for reel_number in reel_numbers:
-            if reel_number < 0 or reel_number >= len(self.reels):
-                raise ValueError("Wrong reel number")
-            reel = self.reels[reel_number]
-            word.append(reel.current_letter())
-            next(reel)
-        return "".join(word)
+    def _get_reel_numbers(self, word: str) -> List[int]:
+        reels_letters = defaultdict(list)
+        for i, reel in enumerate(self.reels):
+            reels_letters[reel.current_letter()].append(i)
+        word_indexes: List[int] = []
+        for letter in word:
+            if len(reels_letters[letter]) > 0:
+                word_indexes.append(reels_letters[letter].pop())
+            else:
+                # incorrect word for the current reels
+                return []
+        return word_indexes
 
-    def current_word(self):
+    def current_reels_letters(self):
         """
-        :return: The current word from all the reels current letter, in reel order
+        :return: The current letters from all the reels current letter,
+        in reel order
         """
         return "".join([reel.current_letter() for reel in self.reels])
 
-    def word_score(self, word: str):
+    def _move_reels(self, reels_to_move: List[int]):
+        self.previous_reels_letters = self.current_reels_letters()
+        # move the reels for the next word
+        for reel_number in reels_to_move:
+            next(self.reels[reel_number])
+
+    def process_word(self, word: str):
+        """
+        Calculates the score of a word typed by the player
+        :param word: the word to score
+        :return:
+            -1 if the word is invalid (can't be built using the reels)
+            0 if the word is valid but not existing in the dictionary
+            >0 (the word score) if the word is valid and exists in the trie
+        """
+        # first, the word must be created using the current_reel_letters
+        reels_to_move = self._get_reel_numbers(word)
+        if len(reels_to_move) == 0:
+            self.number_of_invalid_words += 1
+            self.total_words += 1
+            return -1
+
         score: int = 0
         if self.trie.search_word(word):
             score = self.scorer.calculate_word_score(word)
+            self.last_existing_word = word
+            self.number_of_existing_words += 1
+            self._move_reels(reels_to_move)
+        else:
+            self.last_not_existing_word = word
+            self.number_of_not_existing_words += 1
+
         self.total_words += 1
         self.total_score += score
+
         return score
 
     def reset(self) -> None:
         self.total_words = 0
         self.total_score = 0
+        self.number_of_existing_words = 0
+        self.number_of_not_existing_words = 0
+        self.number_of_invalid_words = 0
