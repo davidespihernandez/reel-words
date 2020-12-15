@@ -9,7 +9,7 @@ class ReelGameForm(npyscreen.Form):
 
     def create(self):
         self.current_letters = self.add(npyscreen.TitleFixedText, name="Letters")
-        self.current_letters.value = self.parentApp.game.current_reels_letters()
+        self.current_letters.value = self.parentApp.game.get_current_reels_letters()
         self.your_word = self.add(npyscreen.TitleText, name="Word")
 
 

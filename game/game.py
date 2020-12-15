@@ -1,5 +1,5 @@
 import logging
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 from typing import List
 
@@ -61,7 +61,7 @@ class ReelGame:
                 return []
         return word_indexes
 
-    def current_reels_letters(self):
+    def get_current_reels_letters(self):
         """
         :return: The current letters from all the reels current letter,
         in reel order
@@ -69,12 +69,15 @@ class ReelGame:
         return "".join([reel.current_letter() for reel in self.reels])
 
     def _move_reels(self, reels_to_move: List[int]):
-        self.previous_reels_letters = self.current_reels_letters()
+        self.previous_reels_letters = self.get_current_reels_letters()
         # move the reels for the next word
         for reel_number in reels_to_move:
             next(self.reels[reel_number])
 
-    def process_word(self, word: str):
+    def add_word_to_dictionary(self, word: str):
+        self.trie.add_word(word)
+
+    def evaluate_word(self, word: str):
         """
         Calculates the score of a word typed by the player
         :param word: the word to score
@@ -111,3 +114,25 @@ class ReelGame:
         self.number_of_existing_words = 0
         self.number_of_not_existing_words = 0
         self.number_of_invalid_words = 0
+
+    def cheat(self) -> List[str]:
+        """
+        Returns the 3 most scored words within all the possible words
+        that can be created using the current reels letters. Each word is
+        followed by the score in parenthesis
+        :return: List of strings
+        """
+        all_possible_words = self.trie.get_all_possible_words(
+            self.get_current_reels_letters()
+        )
+        better_words = OrderedDict()
+        for word in all_possible_words:
+            score = self.scorer.calculate_word_score(word)
+            if len(better_words) > 2:
+                first_word = next(iter(better_words.items()))
+                if first_word[0] < score:
+                    better_words.popitem(last=False)
+                    better_words[score] = word
+            else:
+                better_words[score] = word
+        return [f"{word} ({score})" for score, word in better_words.items()]
