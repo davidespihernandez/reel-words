@@ -1,3 +1,4 @@
+import collections
 import logging
 from collections import defaultdict, OrderedDict
 from pathlib import Path
@@ -114,6 +115,10 @@ class ReelGame:
         self.number_of_existing_words = 0
         self.number_of_not_existing_words = 0
         self.number_of_invalid_words = 0
+        self.last_existing_word = ""
+        self.last_not_existing_word = ""
+        self.previous_reels_letters = ""
+
         # load reels again
         parent = Path(__file__).parent
         path = parent / "resources" / "reels.txt"
@@ -139,4 +144,5 @@ class ReelGame:
                     better_words[score] = word
             else:
                 better_words[score] = word
+            better_words = OrderedDict(sorted(better_words.items()))
         return [f"{word} ({score})" for score, word in better_words.items()]
