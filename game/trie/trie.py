@@ -34,6 +34,12 @@ class Trie:
         return normalized.replace("'", "").lower()
 
     def add_word(self, word: str) -> None:
+        """
+        Adds a word to the tree. The word is normalized to remove accents and other not ascii chars.
+        Increases the internal number of words if the word is new (not existing in the tree).
+        :param word: word to add
+        :return: None
+        """
         if not word:
             return
         node: Node = self.root
@@ -48,6 +54,11 @@ class Trie:
             self.number_of_words += 1
 
     def search_word(self, word: str) -> bool:
+        """
+        Searches for a word in the tree.
+        :param word: word to search
+        :return: True if the word exists, false otherwise.
+        """
         if not word:
             return False
         node: Node = self.root
@@ -58,6 +69,11 @@ class Trie:
         return node.is_leaf
 
     def delete_word(self, word: str) -> bool:
+        """
+        Deletes a word from the Tree. Deletes nodes if necessary.
+        :param word: word to delete
+        :return: None
+        """
         if not word:
             return False
         node: Node = self.root
@@ -87,12 +103,23 @@ class Trie:
         return True
 
     def load_from_file(self, path: Path):
+        """
+        Loads words into the tree from a file.
+        :param path: Path to a text file.
+        :return: None
+        """
         with path.open() as file:
             file_contents = file.read().splitlines()
         for word in file_contents:
             self.add_word(word)
 
     def get_all_possible_words(self, letters: str) -> List[str]:
+        """
+        Given some letters to combine, returns all the possible words that can be created
+        using these letters.
+        :param letters: Letters to combine (reels letters)
+        :return: A list of all possible words.
+        """
         words: List[str] = []
         if not letters or not letters.strip():
             return words
@@ -100,7 +127,7 @@ class Trie:
         for letter in letters:
             if self.search_word(letter):
                 words.append(letter)
-        # now combinations from 2 -> len(word) groups
+        # now permutations from 2 -> len(word) groups
         for group_length in range(2, len(letters) + 1):
             for permutation in itertools.permutations(letters, group_length):
                 permutation_str = "".join(permutation)

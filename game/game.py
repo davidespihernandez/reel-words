@@ -31,7 +31,6 @@ class ReelGame:
     def load_data_from_files(self):
         """
         Loads the scorer, trie and reels data from the resources files
-        :return:
         """
         # separated method to allow mock easier
         logger.info("Loading data...")
@@ -76,6 +75,10 @@ class ReelGame:
             next(self.reels[reel_number])
 
     def add_word_to_dictionary(self, word: str):
+        """
+        Inserts a word in the game trie
+        :param word: word to imsert
+        """
         self.trie.add_word(word)
 
     def evaluate_word(self, word: str):
@@ -110,6 +113,9 @@ class ReelGame:
         return score
 
     def reset(self) -> None:
+        """
+        Resets all the game internal variables and the reels (not the trie or scores)
+        """
         self.total_words = 0
         self.total_score = 0
         self.number_of_existing_words = 0
@@ -129,7 +135,7 @@ class ReelGame:
         Returns the 3 most scored words within all the possible words
         that can be created using the current reels letters. Each word is
         followed by the score in parenthesis
-        :return: List of strings
+        :return: List of words
         """
         all_possible_words = self.trie.get_all_possible_words(
             self.get_current_reels_letters()

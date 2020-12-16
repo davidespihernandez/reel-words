@@ -84,9 +84,10 @@ class TestTrie(TestCase):
 
     def test_all_possible_words(self):
         self.trie.add_word("a")
+        self.trie.add_word("a")
         self.trie.add_word("at")
         self.trie.add_word("sat")
         self.trie.add_word("other")
         result = sorted(self.trie.get_all_possible_words("tas"))
-        expected = ["a", "at", "sat"]
+        expected = ["a", "at", "sat"]  # only the 3 best are returned
         self.assertEqual(expected, result)
