@@ -84,12 +84,7 @@ class Trie:
             node = node.children.get(letter)
             if not node:
                 return False
-            nodes_to_delete.append(
-                (
-                    node,
-                    parent_node,
-                )
-            )
+            nodes_to_delete.append((node, parent_node))
         nodes_to_delete = list(reversed(nodes_to_delete))
         for i, node_tuple in enumerate(nodes_to_delete):
             node: Node = node_tuple[0]

@@ -11,22 +11,8 @@ class TestTrie(TestCase):
     def test_load_from_file_and_search(self):
         path = Path(__file__).parent / "resources" / "words.txt"
         self.trie.load_from_file(path)
-        words_in_file = [
-            "word",
-            "words",
-            "Joe's",
-            "a",
-            "Übermenschen's",
-            "éclair",
-        ]
-        expected = [
-            "word",
-            "words",
-            "joes",
-            "a",
-            "ubermenschens",
-            "eclair",
-        ]
+        words_in_file = ["word", "words", "Joe's", "a", "Übermenschen's", "éclair"]
+        expected = ["word", "words", "joes", "a", "ubermenschens", "eclair"]
         self.assertEqual(self.trie.number_of_words, len(words_in_file))
         search_result = {word: self.trie.search_word(word) for word in expected}
         self.assertTrue(all([v for k, v in search_result.items()]))
